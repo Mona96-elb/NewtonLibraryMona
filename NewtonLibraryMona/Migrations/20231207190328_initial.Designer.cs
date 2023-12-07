@@ -12,7 +12,7 @@ using NewtonLibraryMona.Data;
 namespace NewtonLibraryMona.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20231205144450_initial")]
+    [Migration("20231207190328_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -69,11 +69,14 @@ namespace NewtonLibraryMona.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BookID"));
 
-                    b.Property<int?>("BookLoanId")
+                    b.Property<int?>("BorowerCardID")
                         .HasColumnType("int");
 
                     b.Property<double?>("Grade")
                         .HasColumnType("float");
+
+                    b.Property<bool?>("IsAvailable")
+                        .HasColumnType("bit");
 
                     b.Property<string>("IsBn")
                         .IsRequired()
@@ -88,7 +91,7 @@ namespace NewtonLibraryMona.Migrations
 
                     b.HasKey("BookID");
 
-                    b.HasIndex("BookLoanId");
+                    b.HasIndex("BorowerCardID");
 
                     b.ToTable("Books");
                 });
@@ -101,7 +104,10 @@ namespace NewtonLibraryMona.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BorowerID")
+                    b.Property<int>("BookID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BorowerID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("LoanDate")
@@ -111,6 +117,9 @@ namespace NewtonLibraryMona.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookID")
+                        .IsUnique();
 
                     b.HasIndex("BorowerID");
 
@@ -133,6 +142,22 @@ namespace NewtonLibraryMona.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("BorowerID");
+
+                    b.ToTable("Borowers");
+                });
+
+            modelBuilder.Entity("NewtonLibraryMona.Models.BorowerCard", b =>
+                {
+                    b.Property<int>("BorowerCardID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BorowerCardID"));
+
+                    b.Property<int>("BorowerID")
+                        .HasColumnType("int");
+
                     b.Property<string>("LibraryCardNummber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -141,9 +166,12 @@ namespace NewtonLibraryMona.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("BorowerID");
+                    b.HasKey("BorowerCardID");
 
-                    b.ToTable("Borowers");
+                    b.HasIndex("BorowerID")
+                        .IsUnique();
+
+                    b.ToTable("BorowerCard");
                 });
 
             modelBuilder.Entity("AuthorBook", b =>
@@ -163,30 +191,58 @@ namespace NewtonLibraryMona.Migrations
 
             modelBuilder.Entity("NewtonLibraryMona.Models.Book", b =>
                 {
-                    b.HasOne("NewtonLibraryMona.Models.BookLoan", "BookLoan")
+                    b.HasOne("NewtonLibraryMona.Models.BorowerCard", null)
                         .WithMany("Books")
-                        .HasForeignKey("BookLoanId");
-
-                    b.Navigation("BookLoan");
+                        .HasForeignKey("BorowerCardID");
                 });
 
             modelBuilder.Entity("NewtonLibraryMona.Models.BookLoan", b =>
                 {
+                    b.HasOne("NewtonLibraryMona.Models.Book", "Book")
+                        .WithOne("BookLoan")
+                        .HasForeignKey("NewtonLibraryMona.Models.BookLoan", "BookID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NewtonLibraryMona.Models.Borower", "Borower")
-                        .WithMany("BookLoan")
-                        .HasForeignKey("BorowerID");
+                        .WithMany("BookLoans")
+                        .HasForeignKey("BorowerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
 
                     b.Navigation("Borower");
                 });
 
-            modelBuilder.Entity("NewtonLibraryMona.Models.BookLoan", b =>
+            modelBuilder.Entity("NewtonLibraryMona.Models.BorowerCard", b =>
                 {
-                    b.Navigation("Books");
+                    b.HasOne("NewtonLibraryMona.Models.Borower", "borower")
+                        .WithOne("BorowerCard")
+                        .HasForeignKey("NewtonLibraryMona.Models.BorowerCard", "BorowerID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("borower");
+                });
+
+            modelBuilder.Entity("NewtonLibraryMona.Models.Book", b =>
+                {
+                    b.Navigation("BookLoan")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NewtonLibraryMona.Models.Borower", b =>
                 {
-                    b.Navigation("BookLoan");
+                    b.Navigation("BookLoans");
+
+                    b.Navigation("BorowerCard")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NewtonLibraryMona.Models.BorowerCard", b =>
+                {
+                    b.Navigation("Books");
                 });
 #pragma warning restore 612, 618
         }

@@ -75,42 +75,92 @@ namespace NewtonLibraryMona.Data
 
 
 
-        public Author CreateAuthor(string firstName, string lastName)
+        public void CreateAuthor()
         {
+            string firstName = "";
+            string lastName = "";
+            Console.WriteLine("Entier firstName");
+            firstName = Console.ReadLine();
+
+            Console.WriteLine("Enter Last Name");
+            lastName = Console.ReadLine();
+
             var author = new Author { FirstName = firstName, LastName = lastName };
             context.Authors.Add(author);
             context.SaveChanges();
-            return author;
+            
+            
+
+            
+            
         }
 
-        public Book CreateBook(string Title, string Isbn, int PublishYear, double Grade)
+        public Book CreateBook(string Title, string Isbn)
         {
-            var book = new Book { Title = Title, IsBn = Isbn, PublishYear = PublishYear, Grade = Grade };
+            Random random = new Random();
+
+
+            var book = new Book { Title = Title, IsBn = Isbn, PublishYear = random.Next(2020, 2025), Grade = random.Next(0, 5) };
             context.Books.Add(book);
             context.SaveChanges();
             return book;
-        }
 
-        public Borower CreateBorower(string firstName, string lastName, string libraryCardNumber, string libraryCardPin)
+
+        }    
+            
+
+
+        
+
+        public void CreateBorower()
         {
-            var borowerCard = new BorowerCard { LibraryCardNummber = libraryCardNumber, LibraryCardPin = libraryCardPin };
+            Random rnd = new Random();
+
+            string str = rnd.Next(10000, 99999).ToString();
+            string str1 = rnd.Next(1000, 9999).ToString();
+
+            var borowerCard = new BorowerCard { LibraryCardNummber= str, LibraryCardPin = str1};
+
+            
+            Console.WriteLine("Entier firstName");
+            string firstName = Console.ReadLine();
+
+            Console.WriteLine("Enter Last Name");
+            string lastName = Console.ReadLine();
+
             var borower = new Borower { FirstName = firstName, LastName = lastName, BorowerCard = borowerCard };
             context.Borowers.Add(borower);
             context.SaveChanges();
-            return borower;
+           
         }
 
         public void BorrowBook(Borower borower, Book book)
         {
+            var bookL= context.Books.ToList();
+            for (int i = 0; i < bookL.Count; i++)
+            {
+                if (bookL[i].IsAvailable == true)
+                    Console.WriteLine($"{bookL[i].BookID}: {bookL[i].Title}");
+
+
+
+            }
             var loan = new BookLoan { Borower = borower, Book = book, LoanDate = DateTime.Now };
             context.BookLoans.Add(loan);
             context.SaveChanges();
         }
 
 
-        public void ReturnBook(Borower borower, Book book)
+            
+
+            
+          
+
+
+
+        public void ReturnBook(int borower, int book)
         {
-            var loan = context.BookLoans.SingleOrDefault(l => l.Borower == borower && l.Book == book && l.ReturnDate == null);
+            var loan = context.BookLoans.SingleOrDefault(l => l.BorowerID == borower && l.BookID == book && l.ReturnDate == null);
 
             if (loan != null)
             {
@@ -123,34 +173,63 @@ namespace NewtonLibraryMona.Data
             }
         }
 
-        public void DeleteBorrower(Borower borower)
+        public void DeleteBorrower(int borowerID)
         {
-            context.Borowers.Remove(borower);
-            context.SaveChanges();
+            var borower = context.Borowers.SingleOrDefault(l => l.BorowerID == borowerID);
+            if (borower != null)
+            {
+                context.Borowers.Remove(borower);
+                context.SaveChanges();
+
+            }
+            else
+            {
+                return;
+            }
+           
         }
 
-        public void DeleteBook(Book book)
+        public void DeleteBook(int bookID)
         {
-            context.Books.Remove(book);
-            context.SaveChanges();
+            var books = context.Books.SingleOrDefault(l => l.BookID == bookID);
+            if (books != null)
+            {
+                context.Books.Remove(books);
+                context.SaveChanges();
+            }
+            else
+            {
+                return;
+            }
+           
         }
 
-        public void DeleteAuthor(Author author)
+        public void DeleteAuthor(int AuthorID)
         {
-            context.Authors.Remove(author);
-            context.SaveChanges();
+            var Author = context.Authors.SingleOrDefault(l => l.AuthorID == AuthorID);
+            if (Author != null)
+            {
+                context.Authors.Remove(Author);
+                context.SaveChanges();
+
+            }
+            else
+            {
+                return;
+            }
+           
         }
-
-
-
-
-
-
-
 
 
     }
+
+
 }
+
+
+
+
+
 
 
 

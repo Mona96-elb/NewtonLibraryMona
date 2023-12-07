@@ -16,15 +16,17 @@ namespace NewtonLibraryMona.Models
 
         public double? Grade { get; set; }
 
+        public bool? IsAvailable { get; set; } 
 
 
+        public ICollection<Author> Authors { get; set; } = new List<Author>();
+        public BookLoan BookLoan { get; set; }
 
 
-        public ICollection< Author> Authors { get; set; }=new List< Author>();  
 
        
-       
-        public ICollection<BookLoan> BookLoans { get; set; } = new List<BookLoan>();
+
+        
 
 
 
